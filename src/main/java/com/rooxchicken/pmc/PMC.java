@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rooxchicken.pmc.networking.text.TextUAC;
+import com.rooxchicken.pmc.networking.PMCPacket;
 
 public class PMC implements ModInitializer
 {
@@ -18,7 +18,7 @@ public class PMC implements ModInitializer
 	@Override
 	public void onInitialize()
 	{
-		PayloadTypeRegistry.playS2C().register(TextUAC.PACKET_ID, TextUAC.PACKET_CODEC);
+		PayloadTypeRegistry.playS2C().register(PMCPacket.PACKET_ID, PMCPacket.PACKET_CODEC);
 
 		LOGGER.info("Allowing S2C & C2S since 1987! [made by roo]");
 	}

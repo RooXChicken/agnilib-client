@@ -1,13 +1,14 @@
 package com.rooxchicken.pmc.data;
 
-public class Text
+public class Text extends Component
 {
-    public Component component;
+    public static final short textID = 2;
+
     public String text;
     public int color;
 
-    public Text(Component _component)
+    public Text(String _id)
     {
-        component = _component;
+        super(_id);
     }
 }

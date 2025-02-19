@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 public class Component
 {
+    public static final short componentID = 1;
+
     public String id = "";
 
     public double posX = 0;

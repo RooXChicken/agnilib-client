@@ -3,6 +3,7 @@ package com.rooxchicken.pmc.event;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.rooxchicken.pmc.PMC;
 import com.rooxchicken.pmc.PMCClient;
+import com.rooxchicken.pmc.data.Component;
 import com.rooxchicken.pmc.data.Text;
 
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -23,11 +24,14 @@ public class DrawGUICallback implements HudRenderCallback
         MinecraftClient client = MinecraftClient.getInstance();
         TextRenderer textRenderer = client.textRenderer;
 
-        for(Text _text : PMCClient.text)
+        for(Component _component : PMCClient.components)
         {
-            startTransformation(_drawContext, _text.component.scaleX, _text.component.scaleY, _text.component.posX, _text.component.posY);
-            _drawContext.drawText(textRenderer, net.minecraft.text.Text.of(_text.text), 0, 0, _text.color, true);
-            stopTransformation(_drawContext);
+            if(_component instanceof Text _text)
+            {
+                startTransformation(_drawContext, _text.scaleX, _text.scaleY, _text.posX, _text.posY);
+                _drawContext.drawText(textRenderer, net.minecraft.text.Text.of(_text.text), 0, 0, _text.color, true);
+                stopTransformation(_drawContext);
+            }
         }
     }
     
