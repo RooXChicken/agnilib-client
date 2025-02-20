@@ -1,4 +1,4 @@
-package com.rooxchicken.pmc.data;
+package com.rooxchicken.pmc.objects;
 
 public class Text extends Component
 {

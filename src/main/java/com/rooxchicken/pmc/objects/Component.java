@@ -1,10 +1,11 @@
-package com.rooxchicken.pmc.data;
+package com.rooxchicken.pmc.objects;
 
 import java.util.ArrayList;
 
 public class Component
 {
-    public static final short componentID = 1;
+    public static final short componentID = 0;
+    public static final short removeID = 1;
 
     public String id = "";
 
@@ -14,8 +15,10 @@ public class Component
     public double scaleX = 1;
     public double scaleY = 1;
 
-     public Component(String _id)
+    public Component(String _id)
     {
         id = _id;
     }
+
+    public void onDestroy() {}
 }

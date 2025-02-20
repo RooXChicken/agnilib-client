@@ -3,8 +3,9 @@ package com.rooxchicken.pmc.event;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.rooxchicken.pmc.PMC;
 import com.rooxchicken.pmc.PMCClient;
-import com.rooxchicken.pmc.data.Component;
-import com.rooxchicken.pmc.data.Text;
+import com.rooxchicken.pmc.objects.Component;
+import com.rooxchicken.pmc.objects.Image;
+import com.rooxchicken.pmc.objects.Text;
 
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
@@ -30,6 +31,15 @@ public class DrawGUICallback implements HudRenderCallback
             {
                 startTransformation(_drawContext, _text.scaleX, _text.scaleY, _text.posX, _text.posY);
                 _drawContext.drawText(textRenderer, net.minecraft.text.Text.of(_text.text), 0, 0, _text.color, true);
+                stopTransformation(_drawContext);
+            }
+            else if(_component instanceof Image _image)
+            {
+                if(_image.nativeImage == null)
+                    continue;
+                    
+                startTransformation(_drawContext, _image.scaleX, _image.scaleY, _image.posX, _image.posY);
+                _drawContext.drawTexture(_image.identifier, 0, 0, 0, 0, _image.nativeImage.getWidth(), _image.nativeImage.getHeight(), _image.nativeImage.getWidth(), _image.nativeImage.getHeight());
                 stopTransformation(_drawContext);
             }
         }

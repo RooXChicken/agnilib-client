@@ -1,7 +1,7 @@
 package com.rooxchicken.pmc.networking;
 
 import com.rooxchicken.pmc.PMC;
-import com.rooxchicken.pmc.data.Text;
+import com.rooxchicken.pmc.objects.Text;
 
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;

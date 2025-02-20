@@ -1,12 +1,16 @@
 package com.rooxchicken.pmc;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 
-import com.rooxchicken.pmc.data.Component;
-import com.rooxchicken.pmc.data.Text;
 import com.rooxchicken.pmc.event.DrawGUICallback;
 import com.rooxchicken.pmc.networking.PMCPacket;
+import com.rooxchicken.pmc.objects.Component;
+import com.rooxchicken.pmc.objects.Image;
+import com.rooxchicken.pmc.objects.Text;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -46,7 +50,7 @@ public class PMCClient implements ClientModInitializer
 			switch(_status)
 			{
 				case Component.componentID:
-					Component _component = getComponent(_buf);
+					Component _component = getComponent(_buf, Component.class);
 
 					_component.posX = _buf.readDouble();
 					_component.posY = _buf.readDouble();
@@ -54,11 +58,37 @@ public class PMCClient implements ClientModInitializer
 					_component.scaleY = _buf.readDouble();
 				break;
 
+				case Component.removeID:
+					Component _toRemove = getComponent(_buf, Component.class);
+					components.remove(_toRemove);
+				break;
+
 				case Text.textID:
-					Text _text = getText(_buf);
+					Text _text = (Text)getComponent(_buf, Text.class);
 
 					_text.text = readString(_buf);
 					_text.color = _buf.readInt();
+				break;
+
+				case Image.imageID:
+					Image _image = (Image)getComponent(_buf, Image.class);
+
+					int _imgSize = Integer.parseInt(readString(_buf));
+
+					int _start = Integer.parseInt(readString(_buf));
+					int _size = Integer.parseInt(readString(_buf));
+
+					if(_start == 0)
+						_image.data = new byte[_imgSize];
+
+					for(int i = _start; i < _start+_size; i++)
+						_image.data[i] = _buf.readByte();
+
+				break;
+
+				case Image.finishID:
+					Image _finishedImage = (Image)getComponent(_buf, Image.class);
+					_finishedImage.importImage();
 				break;
 			}
 		});
@@ -73,7 +103,7 @@ public class PMCClient implements ClientModInitializer
 		return -1;
 	}
 
-	private Component getComponent(PacketByteBuf _buf)
+	private Component getComponent(PacketByteBuf _buf, Class<?> _clazz)
 	{
 		String _id = readString(_buf);
 		int _cID = getComponentID(_id);
@@ -81,24 +111,20 @@ public class PMCClient implements ClientModInitializer
 		if(_cID == -1)
 		{
 			_cID = components.size();
-			components.add(new Component(_id));
+			try
+			{
+				Constructor<?> _constructor = _clazz.getConstructor(String.class);
+				Object _component = _constructor.newInstance(new Object[] { _id });
+				
+				components.add((Component)_component);
+			}
+			catch(Exception e)
+			{
+				PMC.LOGGER.error("Class does not have this constructor! ", e);
+			}
 		}
 
 		return components.get(_cID);
-	}
-
-	private Text getText(PacketByteBuf _buf)
-	{
-		String _id = readString(_buf);
-		int _cID = getComponentID(_id);
-		
-		if(_cID == -1)
-		{
-			_cID = components.size();
-			components.add(new Text(_id));
-		}
-
-		return (Text)components.get(_cID);
 	}
 
 	private String readString(PacketByteBuf _buf)
