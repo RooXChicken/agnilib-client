@@ -15,6 +15,8 @@ import net.minecraft.util.Identifier;
 
 public record PMCPacket(byte[] buf) implements CustomPayload
 {
+    public static final short MAX_SEND_SIZE = 13240;
+
     public static final CustomPayload.Id<PMCPacket> PACKET_ID = new CustomPayload.Id<>(Identifier.of(PMC.MOD_ID, "channel"));
     public static final PacketCodec<RegistryByteBuf, PMCPacket> PACKET_CODEC = PacketCodecs.BYTE_ARRAY.xmap(PMCPacket::new, PMCPacket::buf).cast();
     

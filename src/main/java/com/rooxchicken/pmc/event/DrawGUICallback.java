@@ -35,13 +35,22 @@ public class DrawGUICallback implements HudRenderCallback
             }
             else if(_component instanceof Image _image)
             {
-                if(_image.nativeImage == null)
+                if(Image.loadedTextures.get(_image.name) == null)
                     continue;
                     
                 startTransformation(_drawContext, _image.scaleX, _image.scaleY, _image.posX, _image.posY);
-                _drawContext.drawTexture(_image.identifier, 0, 0, 0, 0, _image.nativeImage.getWidth(), _image.nativeImage.getHeight(), _image.nativeImage.getWidth(), _image.nativeImage.getHeight());
+
+                RenderSystem.setShaderColor(_image.r, _image.g, _image.b, _image.a);
+                if(_image.blend)
+                    RenderSystem.enableBlend();
+                    
+                int _width = Image.loadedTextures.get(_image.name).nativeImage.getWidth();
+                int _height = Image.loadedTextures.get(_image.name).nativeImage.getHeight();
+                _drawContext.drawTexture(Identifier.of(PMC.MOD_ID, "textures/" + _image.name), 0, 0, 0, 0, _width, _height, _width, _height);
                 stopTransformation(_drawContext);
             }
+            
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
     }
     

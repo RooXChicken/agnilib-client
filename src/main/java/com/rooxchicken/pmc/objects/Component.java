@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class Component
 {
-    public static final short componentID = 0;
-    public static final short removeID = 1;
+    public static final short componentID = 1;
+    public static final short removeID = 2;
 
     public String id = "";
 

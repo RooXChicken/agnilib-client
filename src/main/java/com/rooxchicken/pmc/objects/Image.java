@@ -4,10 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 
 import org.lwjgl.system.MemoryUtil;
 
 import com.rooxchicken.pmc.PMC;
+import com.rooxchicken.pmc.data.ImagePair;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.MinecraftClient;
@@ -17,49 +19,50 @@ import net.minecraft.util.Identifier;
 
 public class Image extends Component
 {
-    public static final short imageID = 3;
-    public static final short finishID = 4;
-    public static final short MAX_SEND_SIZE = 13240;
+    public static HashMap<String, ImagePair> loadedTextures = new HashMap<String, ImagePair>();
 
-    // public ByteBuffer data;
-    public byte[] data;
-    
-    public Identifier identifier;
-    public NativeImageBackedTexture image = null;
-    public NativeImage nativeImage = null;
+    public static final short imageID = 4;
+
+    public static final short preloadID = 5;
+    public static final short finishID = 6;
+
+    public String name;
+
+    public float r = 0;
+    public float g = 0;
+    public float b = 0;
+    public float a = 0;
+    public boolean blend = false;
 
     public Image(String _id)
     {
         super(_id);
     }
 
-    public void importImage()
+    public static void loadImage(String _id, byte[] _data)
     {
-        identifier = Identifier.of(PMC.MOD_ID, "textures/" + id);
         try
         {
-            InputStream _stream = new ByteArrayInputStream(data);
-            nativeImage = NativeImage.read(_stream);
+            InputStream _stream = new ByteArrayInputStream(_data);
+            NativeImage _nativeImage = NativeImage.read(_stream);
             _stream.close();
-            image = new NativeImageBackedTexture(nativeImage);
+
+            NativeImageBackedTexture _backedImage = new NativeImageBackedTexture(_nativeImage);
             
             MinecraftClient _client = MinecraftClient.getInstance();
-            _client.getTextureManager().registerTexture(identifier, image);
+            _client.getTextureManager().registerTexture(Identifier.of(PMC.MOD_ID, "textures/" + _id), _backedImage);
 
+            loadedTextures.put(_id, new ImagePair(_nativeImage, _backedImage));
         }
         catch(Exception e)
         {
-            PMC.LOGGER.error("Failed to read byte array for texture: " + id, e);
+            PMC.LOGGER.error("Failed to read byte array for texture: " + _id, e);
         }
     }
 
-    @Override
-    public void onDestroy()
+    public static void destroyImage(String _id)
     {
         MinecraftClient _client = MinecraftClient.getInstance();
-        _client.getTextureManager().destroyTexture(identifier);
-        
-        image.close();
-        image = null;
+        _client.getTextureManager().destroyTexture(Identifier.of(PMC.MOD_ID, "textures/" + _id));
     }
 }
