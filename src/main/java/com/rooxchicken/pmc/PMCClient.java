@@ -7,19 +7,31 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.rooxchicken.pmc.event.DrawGUICallback;
 import com.rooxchicken.pmc.event.KeybindCallback;
+import com.rooxchicken.pmc.networking.PMCDataHandler;
 import com.rooxchicken.pmc.networking.PMCPacket;
+import com.rooxchicken.pmc.networking.handlers.ComponentDataHandler;
+import com.rooxchicken.pmc.networking.handlers.ComponentRemoveDataHandler;
+import com.rooxchicken.pmc.networking.handlers.ImageCompleteHandler;
+import com.rooxchicken.pmc.networking.handlers.ImageDataHandler;
+import com.rooxchicken.pmc.networking.handlers.ImageHandler;
+import com.rooxchicken.pmc.networking.handlers.LoginDataHandler;
+import com.rooxchicken.pmc.networking.handlers.TextDataHandler;
 import com.rooxchicken.pmc.objects.Component;
 import com.rooxchicken.pmc.objects.Image;
 import com.rooxchicken.pmc.objects.Text;
+import com.rooxchicken.pmc.mixin.AddKeybindsMixin;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -28,11 +40,13 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
 import net.fabricmc.fabric.impl.networking.payload.PayloadHelper;
 import net.fabricmc.fabric.impl.registry.sync.packet.DirectRegistryPacketHandler.Payload;
 import net.fabricmc.fabric.impl.screenhandler.client.ClientNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.encoding.VarInts;
 import net.minecraft.network.packet.CustomPayload.Id;
@@ -40,12 +54,14 @@ import net.minecraft.util.Identifier;
 
 public class PMCClient implements ClientModInitializer
 {
-	private static final short PMC_VERSION = 1;
+	public static final short PMC_VERSION = 1;
 
 	private static final short loginID = 0;
+	private HashMap<Short, PMCDataHandler> registeredDataHandlers;
+
+	private KeybindCallback keybindCallback;
 
 	public static ArrayList<Component> components = new ArrayList<Component>();
-	private static HashMap<String, byte[]> workingTetxures = new HashMap<String, byte[]>();
 
 	private boolean hasInitialized = false;
 
@@ -54,11 +70,18 @@ public class PMCClient implements ClientModInitializer
 	{
 		HudRenderCallback.EVENT.register(new DrawGUICallback());
 
+		registeredDataHandlers = new HashMap<Short, PMCDataHandler>();
+		registerHandlers();
+
 		ClientPlayConnectionEvents.DISCONNECT.register
 		((handler, client) ->
 		{
 			components.clear();
 			Image.loadedTextures.clear();
+
+			// for(KeyBinding _bind : keybindCallback.registeredBidnings)
+			// 	_bind.setBoundKey(InputUtil.UNKNOWN_KEY);
+
 			hasInitialized = false;
 		});
 		
@@ -70,75 +93,21 @@ public class PMCClient implements ClientModInitializer
 			ByteBuf _buf = Unpooled.copiedBuffer(_payload.buf());
 			short _status = _buf.readShort();
 
-			switch(_status)
-			{
-				case loginID:
-					int _version = _buf.readInt();
+			if(!registeredDataHandlers.containsKey(_status))
+				PMC.LOGGER.error("There is no registered handler for type: " + _status + "!");
+			else
+				registeredDataHandlers.get(_status).handleData(_buf);
 
-					if(_version > PMC_VERSION)
-						MinecraftClient.getInstance().player.sendMessage(net.minecraft.text.Text.of("§4Your mod version is out of date! Expect bugs! C: " + PMC_VERSION + " S: " + _version));
-					else if(_version < PMC_VERSION)
-						MinecraftClient.getInstance().player.sendMessage(net.minecraft.text.Text.of("§4Your mod version is too new! Expect bugs! C: " + PMC_VERSION + " S: " + _version));
-				break;
+			// switch(_status)
+			// {
+			// 	case KeybindCallback.createKeybindID:
+			// 		// String _category = readString(_buf);
+			// 		// String _translation = readString(_buf);
 
-				case Component.componentID:
-					Component _component = getComponent(_buf, Component.class);
-
-					_component.posX = _buf.readDouble();
-					_component.posY = _buf.readDouble();
-					_component.scaleX = _buf.readDouble();
-					_component.scaleY = _buf.readDouble();
-				break;
-
-				case Component.removeID:
-					Component _toRemove = getComponent(_buf, Component.class);
-					components.remove(_toRemove);
-				break;
-
-				case Text.textID:
-					Text _text = (Text)getComponent(_buf, Text.class);
-
-					_text.text = readString(_buf);
-					_text.color = _buf.readInt();
-				break;
-
-				case Image.preloadID:
-					String _imageID = readString(_buf);
-					int _imgSize = Integer.parseInt(readString(_buf));
-
-					int _start = Integer.parseInt(readString(_buf));
-					int _size = Integer.parseInt(readString(_buf));
-					
-					if(_start == 0)
-						workingTetxures.put(_imageID, new byte[_imgSize]);
-
-					byte[] _imageData = workingTetxures.get(_imageID);
-					
-					for(int i = _start; i < _start+_size; i++)
-						_imageData[i] = _buf.readByte();
-
-				break;
-
-				case Image.finishID:
-					String _finishedImageID = readString(_buf);
-					Image.loadImage(_finishedImageID, workingTetxures.get(_finishedImageID));
-
-					workingTetxures.remove(_finishedImageID);
-
-				break;
-
-				case Image.imageID:
-					Image _finishedImage = (Image)getComponent(_buf, Image.class);
-
-					_finishedImage.name = readString(_buf);
-
-					_finishedImage.r = _buf.readFloat();
-					_finishedImage.g = _buf.readFloat();
-					_finishedImage.b = _buf.readFloat();
-					_finishedImage.a = _buf.readFloat();
-					_finishedImage.blend = _buf.readBoolean();
-				break;
-			}
+			// 		// AddKeybindsMixin.setAllKeys((KeyBinding[])ArrayUtils.add(AddKeybindsMixin.getAllKeys(), new KeyBinding[] { new KeyBinding(_translation, InputUtil.UNKNOWN_KEY.getCode(), _category) }));
+			// 		// // KeybindCallback.registeredBindings.add(KeyBindingHelper.registerKeyBinding(new KeyBinding(_translation, InputUtil.UNKNOWN_KEY.getCode(), _category)));
+			// 	break;
+			// }
 		});
 
 		ClientTickEvents.END_WORLD_TICK.register
@@ -154,10 +123,11 @@ public class PMCClient implements ClientModInitializer
 			}
 		});
 
-		WorldRenderEvents.END.register(new KeybindCallback());
+		keybindCallback = new KeybindCallback();
+		WorldRenderEvents.END.register(keybindCallback);
 	}
 
-	private int getComponentID(String _id)
+	public int getComponentID(String _id)
 	{
 		for(int i = 0; i < components.size(); i++)
 			if(components.get(i).id.equals(_id))
@@ -166,7 +136,7 @@ public class PMCClient implements ClientModInitializer
 		return -1;
 	}
 
-	private Component getComponent(ByteBuf _buf, Class<?> _clazz)
+	public Component getComponent(ByteBuf _buf, Class<?> _clazz)
 	{
 		String _id = readString(_buf);
 		int _cID = getComponentID(_id);
@@ -190,7 +160,7 @@ public class PMCClient implements ClientModInitializer
 		return components.get(_cID);
 	}
 
-	private String readString(ByteBuf _buf)
+	public String readString(ByteBuf _buf)
 	{
 		return _buf.readCharSequence(_buf.readShort(), Charset.defaultCharset()).toString();
 	}
@@ -215,5 +185,19 @@ public class PMCClient implements ClientModInitializer
         _out.write(_data);
             
         ClientPlayNetworking.send(new PMCPacket(_out.toByteArray()));
+	}
+
+	private void registerHandlers()
+	{
+		registeredDataHandlers.put(loginID, new LoginDataHandler(this));
+		
+		registeredDataHandlers.put(Component.componentID, new ComponentDataHandler(this));
+		registeredDataHandlers.put(Component.removeID, new ComponentRemoveDataHandler(this));
+
+		registeredDataHandlers.put(Text.textID, new TextDataHandler(this));
+
+		registeredDataHandlers.put(Image.preloadID, new ImageDataHandler(this));
+		registeredDataHandlers.put(Image.finishID, new ImageCompleteHandler(this, (ImageDataHandler)registeredDataHandlers.get(Image.preloadID)));
+		registeredDataHandlers.put(Image.imageID, new ImageHandler(this));
 	}
 }

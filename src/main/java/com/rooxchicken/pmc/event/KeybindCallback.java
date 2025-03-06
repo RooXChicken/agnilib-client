@@ -1,12 +1,14 @@
 package com.rooxchicken.pmc.event;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 import com.rooxchicken.pmc.PMC;
 import com.rooxchicken.pmc.PMCClient;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents.End;
 import net.minecraft.client.MinecraftClient;
@@ -15,13 +17,16 @@ import net.minecraft.network.encoding.VarInts;
 
 public class KeybindCallback implements End
 {
-    private static final short keybindID = 1;
+    public static final short keybindID = 1;
+    public static final short createKeybindID = 7;
 
+    public static HashSet<KeyBinding> registeredBindings;
     private HashMap<KeyBinding, Boolean> keyState;
 
     public KeybindCallback()
     {
         keyState = new HashMap<KeyBinding, Boolean>();
+        registeredBindings = new HashSet<KeyBinding>();
     }
 
     @Override

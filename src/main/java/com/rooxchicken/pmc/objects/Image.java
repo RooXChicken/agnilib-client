@@ -1,17 +1,12 @@
 package com.rooxchicken.pmc.objects;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
-
-import org.lwjgl.system.MemoryUtil;
 
 import com.rooxchicken.pmc.PMC;
 import com.rooxchicken.pmc.data.ImagePair;
 
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
