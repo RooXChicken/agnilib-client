@@ -1,19 +1,21 @@
 package com.rooxchicken.pmc.event;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 import com.rooxchicken.pmc.PMC;
 import com.rooxchicken.pmc.PMCClient;
+import com.rooxchicken.pmc.mixin.AddCategoryMixin;
+import com.rooxchicken.pmc.mixin.AddKeybindsMixin;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents.End;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.network.encoding.VarInts;
 
 public class KeybindCallback implements End
 {
@@ -57,6 +59,7 @@ public class KeybindCallback implements End
             else if(!_bind.isPressed() && _prev)
                 _mask += 2; // is just released
 
+            PMCClient.writeString(_bind.getCategory(), _buf);
             PMCClient.writeString(_bind.getTranslationKey(), _buf);
             _buf.writeByte(_mask);
 
@@ -66,5 +69,29 @@ public class KeybindCallback implements End
 
         if(!_empty)
             PMCClient.sendData(_buf.array());
-    }   
+    }
+
+    public void unregisterAllCustom()
+    {
+        AddKeybindsMixin _keybinds = ((AddKeybindsMixin)MinecraftClient.getInstance().options);
+        ArrayList<KeyBinding> _notCreated = new ArrayList<KeyBinding>();
+
+        for(KeyBinding _bind : _keybinds.getAllKeys())
+        {
+            if(!KeybindCallback.registeredBindings.contains(_bind))
+                _notCreated.add(_bind);
+        }
+
+        _keybinds.setAllKeys(_notCreated.toArray(new KeyBinding[] {}));
+
+        ArrayList<String> _toRemove = new ArrayList<String>();
+        for(Entry<String, Integer> _category : AddCategoryMixin.getCategories().entrySet())
+        {
+            if(_category.getValue() > 7)
+                _toRemove.add(_category.getKey());
+        }
+
+        for(String _category : _toRemove)
+            AddCategoryMixin.getCategories().remove(_category);
+    }
 }

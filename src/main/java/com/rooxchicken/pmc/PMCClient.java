@@ -1,14 +1,9 @@
 package com.rooxchicken.pmc;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Type;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.rooxchicken.pmc.event.DrawGUICallback;
@@ -21,36 +16,21 @@ import com.rooxchicken.pmc.networking.handlers.ImageCompleteHandler;
 import com.rooxchicken.pmc.networking.handlers.ImageDataHandler;
 import com.rooxchicken.pmc.networking.handlers.ImageHandler;
 import com.rooxchicken.pmc.networking.handlers.LoginDataHandler;
+import com.rooxchicken.pmc.networking.handlers.RegisterKeybindHandler;
 import com.rooxchicken.pmc.networking.handlers.TextDataHandler;
 import com.rooxchicken.pmc.objects.Component;
 import com.rooxchicken.pmc.objects.Image;
 import com.rooxchicken.pmc.objects.Text;
-import com.rooxchicken.pmc.mixin.AddKeybindsMixin;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.impl.client.keybinding.KeyBindingRegistryImpl;
-import net.fabricmc.fabric.impl.networking.payload.PayloadHelper;
-import net.fabricmc.fabric.impl.registry.sync.packet.DirectRegistryPacketHandler.Payload;
-import net.fabricmc.fabric.impl.screenhandler.client.ClientNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.encoding.VarInts;
-import net.minecraft.network.packet.CustomPayload.Id;
-import net.minecraft.util.Identifier;
 
 public class PMCClient implements ClientModInitializer
 {
@@ -79,9 +59,7 @@ public class PMCClient implements ClientModInitializer
 			components.clear();
 			Image.loadedTextures.clear();
 
-			// for(KeyBinding _bind : keybindCallback.registeredBidnings)
-			// 	_bind.setBoundKey(InputUtil.UNKNOWN_KEY);
-
+			keybindCallback.unregisterAllCustom();
 			hasInitialized = false;
 		});
 		
@@ -93,21 +71,10 @@ public class PMCClient implements ClientModInitializer
 			ByteBuf _buf = Unpooled.copiedBuffer(_payload.buf());
 			short _status = _buf.readShort();
 
-			if(!registeredDataHandlers.containsKey(_status))
-				PMC.LOGGER.error("There is no registered handler for type: " + _status + "!");
-			else
+			if(registeredDataHandlers.containsKey(_status))
 				registeredDataHandlers.get(_status).handleData(_buf);
-
-			// switch(_status)
-			// {
-			// 	case KeybindCallback.createKeybindID:
-			// 		// String _category = readString(_buf);
-			// 		// String _translation = readString(_buf);
-
-			// 		// AddKeybindsMixin.setAllKeys((KeyBinding[])ArrayUtils.add(AddKeybindsMixin.getAllKeys(), new KeyBinding[] { new KeyBinding(_translation, InputUtil.UNKNOWN_KEY.getCode(), _category) }));
-			// 		// // KeybindCallback.registeredBindings.add(KeyBindingHelper.registerKeyBinding(new KeyBinding(_translation, InputUtil.UNKNOWN_KEY.getCode(), _category)));
-			// 	break;
-			// }
+			else
+				PMC.LOGGER.error("There is no registered handler for type: " + _status + "!");
 		});
 
 		ClientTickEvents.END_WORLD_TICK.register
@@ -199,5 +166,7 @@ public class PMCClient implements ClientModInitializer
 		registeredDataHandlers.put(Image.preloadID, new ImageDataHandler(this));
 		registeredDataHandlers.put(Image.finishID, new ImageCompleteHandler(this, (ImageDataHandler)registeredDataHandlers.get(Image.preloadID)));
 		registeredDataHandlers.put(Image.imageID, new ImageHandler(this));
+
+		registeredDataHandlers.put(KeybindCallback.createKeybindID, new RegisterKeybindHandler(this));
 	}
 }
