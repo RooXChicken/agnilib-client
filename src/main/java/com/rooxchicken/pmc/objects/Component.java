@@ -9,6 +9,7 @@ public class Component
 
     public String id = "";
 
+    public boolean positionType = false;
     public double posX = 0;
     public double posY = 0;
 

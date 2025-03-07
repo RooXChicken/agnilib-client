@@ -3,9 +3,9 @@
 	"id": "pmc",
 	"version": "${version}",
 	"name": "PMC",
-	"description": "Allows for easy ",
+	"description": "Allows servers to interact with the client more than Vanilla should ever allow",
 	"authors": [
-		"Me!"
+		"RooXChicken"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",

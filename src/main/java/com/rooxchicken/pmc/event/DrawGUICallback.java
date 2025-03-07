@@ -37,8 +37,16 @@ public class DrawGUICallback implements HudRenderCallback
             {
                 if(Image.loadedTextures.get(_image.name) == null)
                     continue;
-                    
-                startTransformation(_drawContext, _image.scaleX, _image.scaleY, _image.posX, _image.posY);
+                
+                double _scaleX = 1.0;
+                double _scaleY = 1.0;
+                if(_image.positionType == true)
+                {
+                    _scaleX *= client.getWindow().getWidth() / client.getWindow().getScaleFactor();
+                    _scaleY *= client.getWindow().getHeight() / client.getWindow().getScaleFactor();
+                }
+
+                startTransformation(_drawContext, _image.scaleX, _image.scaleY, _image.posX * _scaleX, _image.posY * _scaleY);
 
                 RenderSystem.setShaderColor(_image.r, _image.g, _image.b, _image.a);
                 if(_image.blend)

@@ -19,8 +19,10 @@ public class ComponentDataHandler extends PMCDataHandler
     {
         Component _component = pmc.getComponent(_buf, Component.class);
 
+        _component.positionType = _buf.readBoolean();
         _component.posX = _buf.readDouble();
         _component.posY = _buf.readDouble();
+        
         _component.scaleX = _buf.readDouble();
         _component.scaleY = _buf.readDouble();
     }
