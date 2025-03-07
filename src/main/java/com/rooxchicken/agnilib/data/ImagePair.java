@@ -1,4 +1,4 @@
-package com.rooxchicken.pmc.data;
+package com.rooxchicken.agnilib.data;
 
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;

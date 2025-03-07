@@ -1,6 +1,6 @@
-package com.rooxchicken.pmc.mixin;
+package com.rooxchicken.agnilib.mixin;
 
-import com.rooxchicken.pmc.PMC;
+import com.rooxchicken.agnilib.AgniLib;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;

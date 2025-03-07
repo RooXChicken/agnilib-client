@@ -1,4 +1,4 @@
-package com.rooxchicken.pmc;
+package com.rooxchicken.agnilib;
 
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
@@ -6,21 +6,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.rooxchicken.pmc.event.DrawGUICallback;
-import com.rooxchicken.pmc.event.KeybindCallback;
-import com.rooxchicken.pmc.networking.PMCDataHandler;
-import com.rooxchicken.pmc.networking.PMCPacket;
-import com.rooxchicken.pmc.networking.handlers.ComponentDataHandler;
-import com.rooxchicken.pmc.networking.handlers.ComponentRemoveDataHandler;
-import com.rooxchicken.pmc.networking.handlers.ImageCompleteHandler;
-import com.rooxchicken.pmc.networking.handlers.ImageDataHandler;
-import com.rooxchicken.pmc.networking.handlers.ImageHandler;
-import com.rooxchicken.pmc.networking.handlers.LoginDataHandler;
-import com.rooxchicken.pmc.networking.handlers.RegisterKeybindHandler;
-import com.rooxchicken.pmc.networking.handlers.TextDataHandler;
-import com.rooxchicken.pmc.objects.Component;
-import com.rooxchicken.pmc.objects.Image;
-import com.rooxchicken.pmc.objects.Text;
+import com.rooxchicken.agnilib.event.DrawGUICallback;
+import com.rooxchicken.agnilib.event.KeybindCallback;
+import com.rooxchicken.agnilib.networking.AgniLibDataHandler;
+import com.rooxchicken.agnilib.networking.AgniLibPacket;
+import com.rooxchicken.agnilib.networking.handlers.ComponentDataHandler;
+import com.rooxchicken.agnilib.networking.handlers.ComponentRemoveDataHandler;
+import com.rooxchicken.agnilib.networking.handlers.ImageCompleteHandler;
+import com.rooxchicken.agnilib.networking.handlers.ImageDataHandler;
+import com.rooxchicken.agnilib.networking.handlers.ImageHandler;
+import com.rooxchicken.agnilib.networking.handlers.LoginDataHandler;
+import com.rooxchicken.agnilib.networking.handlers.RegisterKeybindHandler;
+import com.rooxchicken.agnilib.networking.handlers.TextDataHandler;
+import com.rooxchicken.agnilib.objects.Component;
+import com.rooxchicken.agnilib.objects.Image;
+import com.rooxchicken.agnilib.objects.Text;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ClientModInitializer;
@@ -32,12 +32,12 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.network.encoding.VarInts;
 
-public class PMCClient implements ClientModInitializer
+public class AgniLibClient implements ClientModInitializer
 {
-	public static final short PMC_VERSION = 1;
+	public static final short AgniLib_VERSION = 1;
 
 	private static final short loginID = 0;
-	private HashMap<Short, PMCDataHandler> registeredDataHandlers;
+	private HashMap<Short, AgniLibDataHandler> registeredDataHandlers;
 
 	private KeybindCallback keybindCallback;
 
@@ -50,7 +50,7 @@ public class PMCClient implements ClientModInitializer
 	{
 		HudRenderCallback.EVENT.register(new DrawGUICallback());
 
-		registeredDataHandlers = new HashMap<Short, PMCDataHandler>();
+		registeredDataHandlers = new HashMap<Short, AgniLibDataHandler>();
 		registerHandlers();
 
 		ClientPlayConnectionEvents.DISCONNECT.register
@@ -63,10 +63,10 @@ public class PMCClient implements ClientModInitializer
 			hasInitialized = false;
 		});
 		
-		PayloadTypeRegistry.playC2S().register(PMCPacket.PACKET_ID, PMCPacket.PACKET_CODEC);
+		PayloadTypeRegistry.playC2S().register(AgniLibPacket.PACKET_ID, AgniLibPacket.PACKET_CODEC);
 
 		ClientPlayNetworking.registerGlobalReceiver
-		(PMCPacket.PACKET_ID, (_payload, _context) ->
+		(AgniLibPacket.PACKET_ID, (_payload, _context) ->
 		{
 			ByteBuf _buf = Unpooled.copiedBuffer(_payload.buf());
 			short _status = _buf.readShort();
@@ -74,7 +74,7 @@ public class PMCClient implements ClientModInitializer
 			if(registeredDataHandlers.containsKey(_status))
 				registeredDataHandlers.get(_status).handleData(_buf);
 			else
-				PMC.LOGGER.error("There is no registered handler for type: " + _status + "!");
+				AgniLib.LOGGER.error("There is no registered handler for type: " + _status + "!");
 		});
 
 		ClientTickEvents.END_WORLD_TICK.register
@@ -120,7 +120,7 @@ public class PMCClient implements ClientModInitializer
 			}
 			catch(Exception e)
 			{
-				PMC.LOGGER.error("Class does not have this constructor! ", e);
+				AgniLib.LOGGER.error("Class does not have this constructor! ", e);
 			}
 		}
 
@@ -151,7 +151,7 @@ public class PMCClient implements ClientModInitializer
         _out.write(_lengthData);
         _out.write(_data);
             
-        ClientPlayNetworking.send(new PMCPacket(_out.toByteArray()));
+        ClientPlayNetworking.send(new AgniLibPacket(_out.toByteArray()));
 	}
 
 	private void registerHandlers()

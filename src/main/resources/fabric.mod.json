@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "pmc",
+	"id": "agnilib",
 	"version": "${version}",
-	"name": "PMC",
+	"name": "AgniLib",
 	"description": "Allows servers to interact with the client more than Vanilla should ever allow",
 	"authors": [
 		"RooXChicken"
@@ -12,14 +12,14 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/pmc/icon.png",
+	"icon": "assets/agnilib/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"main": [ "com.rooxchicken.pmc.PMC" ],
-		"client": [ "com.rooxchicken.pmc.PMCClient" ]
+		"main": [ "com.rooxchicken.agnilib.AgniLib" ],
+		"client": [ "com.rooxchicken.agnilib.AgniLibClient" ]
 	},
 	"mixins": [
-		"pmc.mixins.json"
+		"agnilib.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.15.2",

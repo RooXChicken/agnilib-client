@@ -1,15 +1,15 @@
-package com.rooxchicken.pmc.networking.handlers;
+package com.rooxchicken.agnilib.networking.handlers;
 
-import com.rooxchicken.pmc.PMCClient;
-import com.rooxchicken.pmc.networking.PMCDataHandler;
-import com.rooxchicken.pmc.objects.Component;
+import com.rooxchicken.agnilib.AgniLibClient;
+import com.rooxchicken.agnilib.networking.AgniLibDataHandler;
+import com.rooxchicken.agnilib.objects.Component;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.MinecraftClient;
 
-public class ComponentDataHandler extends PMCDataHandler
+public class ComponentDataHandler extends AgniLibDataHandler
 {
-    public ComponentDataHandler(PMCClient _client)
+    public ComponentDataHandler(AgniLibClient _client)
     {
         super(_client);
     }
@@ -17,7 +17,7 @@ public class ComponentDataHandler extends PMCDataHandler
     @Override
     public void handleData(ByteBuf _buf)
     {
-        Component _component = pmc.getComponent(_buf, Component.class);
+        Component _component = agnilib.getComponent(_buf, Component.class);
 
         _component.positionType = _buf.readBoolean();
         _component.posX = _buf.readDouble();

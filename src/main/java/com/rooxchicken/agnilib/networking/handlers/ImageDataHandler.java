@@ -1,18 +1,18 @@
-package com.rooxchicken.pmc.networking.handlers;
+package com.rooxchicken.agnilib.networking.handlers;
 
 import java.util.HashMap;
-import com.rooxchicken.pmc.PMCClient;
-import com.rooxchicken.pmc.networking.PMCDataHandler;
-import com.rooxchicken.pmc.objects.Component;
+import com.rooxchicken.agnilib.AgniLibClient;
+import com.rooxchicken.agnilib.networking.AgniLibDataHandler;
+import com.rooxchicken.agnilib.objects.Component;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.MinecraftClient;
 
-public class ImageDataHandler extends PMCDataHandler
+public class ImageDataHandler extends AgniLibDataHandler
 {
     public HashMap<String, byte[]> workingTetxures;
 
-    public ImageDataHandler(PMCClient _client)
+    public ImageDataHandler(AgniLibClient _client)
     {
         super(_client);
         workingTetxures = new HashMap<String, byte[]>();
@@ -21,11 +21,11 @@ public class ImageDataHandler extends PMCDataHandler
     @Override
     public void handleData(ByteBuf _buf)
     {
-        String _imageID = pmc.readString(_buf);
-        int _imgSize = Integer.parseInt(pmc.readString(_buf));
+        String _imageID = agnilib.readString(_buf);
+        int _imgSize = Integer.parseInt(agnilib.readString(_buf));
 
-        int _start = Integer.parseInt(pmc.readString(_buf));
-        int _size = Integer.parseInt(pmc.readString(_buf));
+        int _start = Integer.parseInt(agnilib.readString(_buf));
+        int _size = Integer.parseInt(agnilib.readString(_buf));
         
         if(_start == 0)
             workingTetxures.put(_imageID, new byte[_imgSize]);

@@ -1,14 +1,14 @@
-package com.rooxchicken.pmc.event;
+package com.rooxchicken.agnilib.event;
 
 import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import com.rooxchicken.pmc.PMC;
-import com.rooxchicken.pmc.PMCClient;
-import com.rooxchicken.pmc.mixin.AddCategoryMixin;
-import com.rooxchicken.pmc.mixin.AddKeybindsMixin;
+import com.rooxchicken.agnilib.AgniLib;
+import com.rooxchicken.agnilib.AgniLibClient;
+import com.rooxchicken.agnilib.mixin.AddCategoryMixin;
+import com.rooxchicken.agnilib.mixin.AddKeybindsMixin;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -59,8 +59,8 @@ public class KeybindCallback implements End
             else if(!_bind.isPressed() && _prev)
                 _mask += 2; // is just released
 
-            PMCClient.writeString(_bind.getCategory(), _buf);
-            PMCClient.writeString(_bind.getTranslationKey(), _buf);
+            AgniLibClient.writeString(_bind.getCategory(), _buf);
+            AgniLibClient.writeString(_bind.getTranslationKey(), _buf);
             _buf.writeByte(_mask);
 
             keyState.put(_bind, _bind.isPressed());
@@ -68,7 +68,7 @@ public class KeybindCallback implements End
         }
 
         if(!_empty)
-            PMCClient.sendData(_buf.array());
+            AgniLibClient.sendData(_buf.array());
     }
 
     public void unregisterAllCustom()

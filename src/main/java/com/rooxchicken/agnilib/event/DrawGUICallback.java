@@ -1,11 +1,11 @@
-package com.rooxchicken.pmc.event;
+package com.rooxchicken.agnilib.event;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.rooxchicken.pmc.PMC;
-import com.rooxchicken.pmc.PMCClient;
-import com.rooxchicken.pmc.objects.Component;
-import com.rooxchicken.pmc.objects.Image;
-import com.rooxchicken.pmc.objects.Text;
+import com.rooxchicken.agnilib.AgniLib;
+import com.rooxchicken.agnilib.AgniLibClient;
+import com.rooxchicken.agnilib.objects.Component;
+import com.rooxchicken.agnilib.objects.Image;
+import com.rooxchicken.agnilib.objects.Text;
 
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
@@ -25,7 +25,7 @@ public class DrawGUICallback implements HudRenderCallback
         MinecraftClient client = MinecraftClient.getInstance();
         TextRenderer textRenderer = client.textRenderer;
 
-        for(Component _component : PMCClient.components)
+        for(Component _component : AgniLibClient.components)
         {
             if(_component instanceof Text _text)
             {
@@ -54,7 +54,7 @@ public class DrawGUICallback implements HudRenderCallback
                     
                 int _width = Image.loadedTextures.get(_image.name).nativeImage.getWidth();
                 int _height = Image.loadedTextures.get(_image.name).nativeImage.getHeight();
-                _drawContext.drawTexture(Identifier.of(PMC.MOD_ID, "textures/" + _image.name), 0, 0, 0, 0, _width, _height, _width, _height);
+                _drawContext.drawTexture(Identifier.of(AgniLib.MOD_ID, "textures/" + _image.name), 0, 0, 0, 0, _width, _height, _width, _height);
                 stopTransformation(_drawContext);
             }
             

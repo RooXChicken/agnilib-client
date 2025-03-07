@@ -1,4 +1,4 @@
-package com.rooxchicken.pmc.objects;
+package com.rooxchicken.agnilib.objects;
 
 public class Text extends Component
 {

@@ -1,25 +1,25 @@
-package com.rooxchicken.pmc.networking.handlers;
+package com.rooxchicken.agnilib.networking.handlers;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import com.rooxchicken.pmc.PMC;
-import com.rooxchicken.pmc.PMCClient;
-import com.rooxchicken.pmc.event.KeybindCallback;
-import com.rooxchicken.pmc.mixin.AddCategoryMixin;
-import com.rooxchicken.pmc.mixin.AddKeybindsMixin;
-import com.rooxchicken.pmc.networking.PMCDataHandler;
-import com.rooxchicken.pmc.objects.Component;
+import com.rooxchicken.agnilib.AgniLib;
+import com.rooxchicken.agnilib.AgniLibClient;
+import com.rooxchicken.agnilib.event.KeybindCallback;
+import com.rooxchicken.agnilib.mixin.AddCategoryMixin;
+import com.rooxchicken.agnilib.mixin.AddKeybindsMixin;
+import com.rooxchicken.agnilib.networking.AgniLibDataHandler;
+import com.rooxchicken.agnilib.objects.Component;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 
-public class RegisterKeybindHandler extends PMCDataHandler
+public class RegisterKeybindHandler extends AgniLibDataHandler
 {
     private static int addedCategoryIndex = 0;
 
-    public RegisterKeybindHandler(PMCClient _client)
+    public RegisterKeybindHandler(AgniLibClient _client)
     {
         super(_client);
     }
@@ -27,8 +27,8 @@ public class RegisterKeybindHandler extends PMCDataHandler
     @Override
     public void handleData(ByteBuf _buf)
     {
-        String _category = pmc.readString(_buf);
-        String _translation = pmc.readString(_buf);
+        String _category = agnilib.readString(_buf);
+        String _translation = agnilib.readString(_buf);
 
         AddKeybindsMixin _keybinds = ((AddKeybindsMixin)MinecraftClient.getInstance().options);
 

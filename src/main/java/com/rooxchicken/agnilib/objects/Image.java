@@ -1,11 +1,11 @@
-package com.rooxchicken.pmc.objects;
+package com.rooxchicken.agnilib.objects;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 
-import com.rooxchicken.pmc.PMC;
-import com.rooxchicken.pmc.data.ImagePair;
+import com.rooxchicken.agnilib.AgniLib;
+import com.rooxchicken.agnilib.data.ImagePair;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
@@ -45,19 +45,19 @@ public class Image extends Component
             NativeImageBackedTexture _backedImage = new NativeImageBackedTexture(_nativeImage);
             
             MinecraftClient _client = MinecraftClient.getInstance();
-            _client.getTextureManager().registerTexture(Identifier.of(PMC.MOD_ID, "textures/" + _id), _backedImage);
+            _client.getTextureManager().registerTexture(Identifier.of(AgniLib.MOD_ID, "textures/" + _id), _backedImage);
 
             loadedTextures.put(_id, new ImagePair(_nativeImage, _backedImage));
         }
         catch(Exception e)
         {
-            PMC.LOGGER.error("Failed to read byte array for texture: " + _id, e);
+            AgniLib.LOGGER.error("Failed to read byte array for texture: " + _id, e);
         }
     }
 
     public static void destroyImage(String _id)
     {
         MinecraftClient _client = MinecraftClient.getInstance();
-        _client.getTextureManager().destroyTexture(Identifier.of(PMC.MOD_ID, "textures/" + _id));
+        _client.getTextureManager().destroyTexture(Identifier.of(AgniLib.MOD_ID, "textures/" + _id));
     }
 }
