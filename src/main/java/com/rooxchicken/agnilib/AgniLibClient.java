@@ -35,15 +35,12 @@ import net.minecraft.network.encoding.VarInts;
 public class AgniLibClient implements ClientModInitializer
 {
 	public static final short AgniLib_VERSION = 1;
+	public static boolean hasInitialized = false;
 
-	private static final short loginID = 0;
 	private HashMap<Short, AgniLibDataHandler> registeredDataHandlers;
-
-	private KeybindCallback keybindCallback;
-
 	public static ArrayList<Component> components = new ArrayList<Component>();
 
-	private boolean hasInitialized = false;
+	private KeybindCallback keybindCallback;
 
 	@Override
 	public void onInitializeClient()
@@ -84,7 +81,7 @@ public class AgniLibClient implements ClientModInitializer
 			{
 				hasInitialized = true;
 				ByteBuf _buf = Unpooled.buffer();
-				_buf.writeShort(loginID);
+				_buf.writeShort(LoginDataHandler.loginID);
 
 				sendData(_buf.array());
 			}
@@ -156,7 +153,7 @@ public class AgniLibClient implements ClientModInitializer
 
 	private void registerHandlers()
 	{
-		registeredDataHandlers.put(loginID, new LoginDataHandler(this));
+		registeredDataHandlers.put(LoginDataHandler.loginID, new LoginDataHandler(this));
 		
 		registeredDataHandlers.put(Component.componentID, new ComponentDataHandler(this));
 		registeredDataHandlers.put(Component.removeID, new ComponentRemoveDataHandler(this));

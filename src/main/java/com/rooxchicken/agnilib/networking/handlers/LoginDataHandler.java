@@ -8,6 +8,8 @@ import net.minecraft.client.MinecraftClient;
 
 public class LoginDataHandler extends AgniLibDataHandler
 {
+    public static final short loginID = 0;
+    
     public LoginDataHandler(AgniLibClient _client)
     {
         super(_client);
