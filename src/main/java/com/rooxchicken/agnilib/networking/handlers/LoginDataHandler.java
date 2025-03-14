@@ -1,6 +1,7 @@
 package com.rooxchicken.agnilib.networking.handlers;
 
 import com.rooxchicken.agnilib.AgniLibClient;
+import com.rooxchicken.agnilib.data.AgniLibSettings;
 import com.rooxchicken.agnilib.networking.AgniLibDataHandler;
 
 import io.netty.buffer.ByteBuf;
@@ -19,6 +20,7 @@ public class LoginDataHandler extends AgniLibDataHandler
     public void handleData(ByteBuf _buf)
     {
         int _version = _buf.readInt();
+        agnilib.keybindCallback.unregisterAllCustom();
 
         if(_version > AgniLibClient.AgniLib_VERSION)
             MinecraftClient.getInstance().player.sendMessage(net.minecraft.text.Text.of("§4Your mod version is out of date! Expect bugs! C: " + AgniLibClient.AgniLib_VERSION + " S: " + _version));

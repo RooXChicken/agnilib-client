@@ -4,6 +4,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import com.rooxchicken.agnilib.AgniLib;
 import com.rooxchicken.agnilib.AgniLibClient;
+import com.rooxchicken.agnilib.data.AgniLibSettings;
 import com.rooxchicken.agnilib.event.KeybindCallback;
 import com.rooxchicken.agnilib.mixin.AddCategoryMixin;
 import com.rooxchicken.agnilib.mixin.AddKeybindsMixin;
@@ -17,7 +18,7 @@ import net.minecraft.client.util.InputUtil;
 
 public class RegisterKeybindHandler extends AgniLibDataHandler
 {
-    private static int addedCategoryIndex = 0;
+    public static int addedCategoryIndex = 0;
 
     public RegisterKeybindHandler(AgniLibClient _client)
     {
@@ -37,9 +38,10 @@ public class RegisterKeybindHandler extends AgniLibDataHandler
                 return;
 
         if(!AddCategoryMixin.getCategories().containsKey(_category))
-            AddCategoryMixin.getCategories().put(_category, (addedCategoryIndex++) + 7);
+            AddCategoryMixin.getCategories().put(_category, (addedCategoryIndex++) + AddCategoryMixin.getCategories().size());
 
-        KeyBinding _key = new KeyBinding(_translation, InputUtil.UNKNOWN_KEY.getCode(), _category);
+        KeyBinding _key = new KeyBinding(_translation, AgniLibSettings.getKeybind(_category, _translation), _category);
+
         _keybinds.setAllKeys((KeyBinding[])ArrayUtils.add(_keybinds.getAllKeys(), _key));
 
         KeybindCallback.registeredBindings.add(_key);

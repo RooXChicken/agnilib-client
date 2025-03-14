@@ -1,5 +1,6 @@
 package com.rooxchicken.agnilib.networking.handlers;
 
+import com.rooxchicken.agnilib.AgniLib;
 import com.rooxchicken.agnilib.AgniLibClient;
 import com.rooxchicken.agnilib.data.PlayerModification;
 import com.rooxchicken.agnilib.networking.AgniLibDataHandler;
@@ -12,8 +13,6 @@ import net.minecraft.util.math.Vec3d;
 
 public class PlayerModificationHandler extends AgniLibDataHandler
 {
-    public static final short playerModification = 8;
-
     public static final short playerSetVelocity = 0;
     public static final short playerGetVelocity = 1;
 
@@ -30,7 +29,7 @@ public class PlayerModificationHandler extends AgniLibDataHandler
 
         switch(_state)
         {
-            case playerModification:
+            case playerSetVelocity:
                 PlayerModification.velocity = new Vec3d(_buf.readDouble(), _buf.readDouble(), _buf.readDouble());
             break;
         }

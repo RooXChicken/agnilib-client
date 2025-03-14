@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import com.rooxchicken.agnilib.data.AgniLibSettings;
+import com.rooxchicken.agnilib.data.PlayerModification;
 import com.rooxchicken.agnilib.event.DrawGUICallback;
 import com.rooxchicken.agnilib.event.KeybindCallback;
 import com.rooxchicken.agnilib.networking.AgniLibDataHandler;
@@ -16,6 +18,7 @@ import com.rooxchicken.agnilib.networking.handlers.ImageCompleteHandler;
 import com.rooxchicken.agnilib.networking.handlers.ImageDataHandler;
 import com.rooxchicken.agnilib.networking.handlers.ImageHandler;
 import com.rooxchicken.agnilib.networking.handlers.LoginDataHandler;
+import com.rooxchicken.agnilib.networking.handlers.PlayerModificationHandler;
 import com.rooxchicken.agnilib.networking.handlers.RegisterKeybindHandler;
 import com.rooxchicken.agnilib.networking.handlers.TextDataHandler;
 import com.rooxchicken.agnilib.objects.Component;
@@ -31,6 +34,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.network.encoding.VarInts;
+import net.minecraft.util.math.Vec3d;
 
 public class AgniLibClient implements ClientModInitializer
 {
@@ -40,7 +44,7 @@ public class AgniLibClient implements ClientModInitializer
 	private HashMap<Short, AgniLibDataHandler> registeredDataHandlers;
 	public static ArrayList<Component> components = new ArrayList<Component>();
 
-	private KeybindCallback keybindCallback;
+	public KeybindCallback keybindCallback;
 
 	@Override
 	public void onInitializeClient()
@@ -50,9 +54,14 @@ public class AgniLibClient implements ClientModInitializer
 		registeredDataHandlers = new HashMap<Short, AgniLibDataHandler>();
 		registerHandlers();
 
+		keybindCallback = new KeybindCallback();
+		WorldRenderEvents.END.register(keybindCallback);
+
 		ClientPlayConnectionEvents.DISCONNECT.register
 		((handler, client) ->
 		{
+			AgniLibSettings.save(true);
+			
 			components.clear();
 			Image.loadedTextures.clear();
 
@@ -77,18 +86,17 @@ public class AgniLibClient implements ClientModInitializer
 		ClientTickEvents.END_WORLD_TICK.register
 		((client) ->
 		{
+			PlayerModification.velocity = new Vec3d(0, 0, 0);
 			if(!hasInitialized)
 			{
 				hasInitialized = true;
 				ByteBuf _buf = Unpooled.buffer();
 				_buf.writeShort(LoginDataHandler.loginID);
-
+				
 				sendData(_buf.array());
+				AgniLibSettings.load();
 			}
 		});
-
-		keybindCallback = new KeybindCallback();
-		WorldRenderEvents.END.register(keybindCallback);
 	}
 
 	public int getComponentID(String _id)
@@ -165,5 +173,7 @@ public class AgniLibClient implements ClientModInitializer
 		registeredDataHandlers.put(Image.imageID, new ImageHandler(this));
 
 		registeredDataHandlers.put(KeybindCallback.createKeybindID, new RegisterKeybindHandler(this));
+
+		registeredDataHandlers.put(PlayerModification.playerModificationID, new PlayerModificationHandler(this));
 	}
 }
