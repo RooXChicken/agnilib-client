@@ -43,9 +43,6 @@ public class AgniLibSettings
     {
         Gson gson = new Gson();
 		JsonObject file = new JsonObject();
-
-        // if(_combine)
-        //     load();
 		
         file.addProperty("AGNILIB_CONFIG_VERSION", AgniLibClient.AgniLib_VERSION);
         

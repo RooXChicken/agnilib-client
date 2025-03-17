@@ -13,8 +13,12 @@ import net.minecraft.util.math.Vec3d;
 
 public class PlayerModificationHandler extends AgniLibDataHandler
 {
+    public static final short playerModification = 8;
+    
     public static final short playerSetVelocity = 0;
     public static final short playerGetVelocity = 1;
+
+    public static final short playerGetTarget = 3;
 
     public PlayerModificationHandler(AgniLibClient _client)
     {

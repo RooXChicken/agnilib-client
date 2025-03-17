@@ -21,6 +21,7 @@ import com.rooxchicken.agnilib.networking.handlers.LoginDataHandler;
 import com.rooxchicken.agnilib.networking.handlers.PlayerModificationHandler;
 import com.rooxchicken.agnilib.networking.handlers.RegisterKeybindHandler;
 import com.rooxchicken.agnilib.networking.handlers.TextDataHandler;
+import com.rooxchicken.agnilib.networking.senders.TargetDataSender;
 import com.rooxchicken.agnilib.objects.Component;
 import com.rooxchicken.agnilib.objects.Image;
 import com.rooxchicken.agnilib.objects.Text;
@@ -41,9 +42,9 @@ public class AgniLibClient implements ClientModInitializer
 	public static final short AgniLib_VERSION = 1;
 	public static boolean hasInitialized = false;
 
-	private HashMap<Short, AgniLibDataHandler> registeredDataHandlers;
 	public static ArrayList<Component> components = new ArrayList<Component>();
-
+	
+	private HashMap<Short, AgniLibDataHandler> registeredDataHandlers;
 	public KeybindCallback keybindCallback;
 
 	@Override
@@ -83,7 +84,7 @@ public class AgniLibClient implements ClientModInitializer
 				AgniLib.LOGGER.error("There is no registered handler for type: " + _status + "!");
 		});
 
-		ClientTickEvents.END_WORLD_TICK.register
+		ClientTickEvents.END_CLIENT_TICK.register
 		((client) ->
 		{
 			PlayerModification.velocity = new Vec3d(0, 0, 0);
@@ -96,6 +97,8 @@ public class AgniLibClient implements ClientModInitializer
 				sendData(_buf.array());
 				AgniLibSettings.load();
 			}
+
+			TargetDataSender.sendData();
 		});
 	}
 
